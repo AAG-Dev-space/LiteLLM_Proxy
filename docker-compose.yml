@@ -1,0 +1,80 @@
+services:
+  tinyllama1:
+    image: ollama/ollama
+    container_name: tinyllama1
+    ports:
+      - "11431:11434"
+    volumes:
+      - tinyllama1_data:/root/.ollama
+    entrypoint: ollama
+    command: serve
+
+  tinyllama2:
+    image: ollama/ollama
+    container_name: tinyllama2
+    ports:
+      - "11432:11434"
+    volumes:
+      - tinyllama2_data:/root/.ollama
+    entrypoint: ollama
+    command: serve
+
+  tinyllama3:
+    image: ollama/ollama
+    container_name: tinyllama3
+    ports:
+      - "11433:11434"
+    volumes:
+      - tinyllama3_data:/root/.ollama
+    entrypoint: ollama
+    command: serve
+
+  db:
+    image: postgres:16
+    restart: always
+    container_name: litellm_db
+    environment:
+      POSTGRES_DB: litellm
+      POSTGRES_USER: llmproxy
+      POSTGRES_PASSWORD: dbpassword9090
+    ports:
+      - "5431:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persists Postgres data across container restarts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d litellm -U llmproxy"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+  litellm:
+    container_name: litellm
+    image: ghcr.io/berriai/litellm:main-v1.73.0-stable
+    volumes:
+      - ./litellm_settings.yml:/app/config.yml
+    command:
+     - "--config=config.yml"
+    ports:
+      - "4444:4000"
+    environment:
+      DATABASE_URL: "postgresql://llmproxy:dbpassword9090@db:5432/litellm"
+      STORE_MODEL_IN_DB: "True" # allows adding models to proxy via UI
+      LITELLM_MASTER_KEY: "sk-4444" # Your master key for the proxy server. Can use this to send /chat/completion requests etc
+    depends_on:
+      - db  # Indicates that this service depends on the 'db' service, ensuring 'db' starts first
+    healthcheck:  # Defines the health check configuration for the container
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 http://localhost:4444/health/liveliness || exit 1" ]  # Command to execute for health check
+      interval: 30s  # Perform health check every 30 seconds
+      timeout: 10s   # Health check command times out after 10 seconds
+      retries: 3     # Retry up to 3 times if health check fails
+      start_period: 40s  # Wait 40 seconds after container start before beginning health checks
+
+volumes:
+  postgres_data:
+    name: litellm_postgres_data # Named volume for Postgres data persistence
+  tinyllama1_data:
+    name: tinyllama1_data
+  tinyllama2_data:
+    name: tinyllama2_data
+  tinyllama3_data:
+    name: tinyllama3_data
