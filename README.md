@@ -33,3 +33,6 @@ curl http://localhost:4444/v1/chat/completions \
     "messages": [{"role": "user", "content": "안녕!"}]
   }'
 ```
+
+## 모델 추가하는 방법
+GUI로 접속하면 gemini 등 외부 api 아주 쉽게 등록 가능.
