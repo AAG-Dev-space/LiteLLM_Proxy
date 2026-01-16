@@ -13,3 +13,8 @@ model_list:
     litellm_params:
       model: ollama/tinyllama
       api_base: http://tinyllama3:11434
+
+# 회사 SSL inspection 인증서에 Authority Key Identifier 누락으로 인한 설정
+# Python 3.13+ ssl 모듈 호환을 위해 필요
+litellm_settings:
+  ssl_verify: false

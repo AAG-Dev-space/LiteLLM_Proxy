@@ -49,7 +49,9 @@ services:
 
   litellm:
     container_name: litellm
-    image: ghcr.io/berriai/litellm:main-v1.73.0-stable
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - ./litellm_settings.yml:/app/config.yml
     command:
@@ -60,6 +62,11 @@ services:
       DATABASE_URL: "postgresql://llmproxy:dbpassword9090@db:5432/litellm"
       STORE_MODEL_IN_DB: "True" # allows adding models to proxy via UI
       LITELLM_MASTER_KEY: "sk-4444" # Your master key for the proxy server. Can use this to send /chat/completion requests etc
+      # SSL 인증서 환경변수 (회사 CA 적용)
+      SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
+      REQUESTS_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
+      CURL_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
+      NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/ca-certificates.crt"
     depends_on:
       - db  # Indicates that this service depends on the 'db' service, ensuring 'db' starts first
     healthcheck:  # Defines the health check configuration for the container

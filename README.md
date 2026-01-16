@@ -1,5 +1,7 @@
 # 개발용 LiteLLM 설치
 
+## .env 파일에 작성
+
 ## 설치 및 실행
 `docker compose up -d` 로 실행
 
@@ -36,3 +38,5 @@ curl http://localhost:4444/v1/chat/completions \
 
 ## 모델 추가하는 방법
 GUI로 접속하면 gemini 등 외부 api 아주 쉽게 등록 가능.
+
+
